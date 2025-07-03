@@ -12,8 +12,8 @@ import plotly.graph_objects as go
 import streamlit as st
 from PIL import Image
 
-# Load the data
-df = pd.read_excel("French Spirit - Final - Jun2025.xlsx", sheet_name="Jun2025")
+# Load the data from CSV (fixed for Streamlit deployment)
+df = pd.read_csv("Performance_Data_For_Lovable.csv")
 df['Result'] = pd.to_numeric(df['Result'], errors='coerce')
 
 # =========================================
