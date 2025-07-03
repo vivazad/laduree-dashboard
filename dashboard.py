@@ -1,13 +1,4 @@
 
-color_discrete_map = {
-    "Below Expectation": "#FF9999",       # pastel red
-    "Needs Improvement": "#ADD8E6",       # pastel blue
-    "Meets Expectation": "#90EE90",       # pastel green
-    "Outstanding": "#77DD77"              # softer green
-}
-
-
-
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -33,13 +24,22 @@ df = df[
     (df['Audit Status'].isin(statuses))
 ]
 
+# Pastel color map
+color_discrete_map = {
+    "Below Expectation": "#FF9999",
+    "Needs Improvement": "#ADD8E6",
+    "Meets Expectation": "#90EE90",
+    "Outstanding": "#77DD77"
+}
+
 # --------- Main Audit Status Interactive Chart ---------
 st.subheader("📊 Interactive Overall Bell Curve with Audit Status")
-fig_audit = px.histogram(color_discrete_map=color_discrete_map, 
+fig_audit = px.histogram(
     df,
     x="Result",
     nbins=20,
     color="Audit Status",
+    color_discrete_map=color_discrete_map,
     hover_data=["Employee Name", "Store", "Entity Id", "Country"],
     labels={"Result": "Performance Score"},
     title="Overall Distribution by Audit Status"
@@ -66,11 +66,12 @@ st.subheader("🌍 Country-wise Performance Bell Curves")
 for country in sorted(df['Country'].dropna().unique()):
     st.markdown(f"#### {country}")
     country_df = df[df['Country'] == country]
-    fig_country = px.histogram(color_discrete_map=color_discrete_map, 
+    fig_country = px.histogram(
         country_df,
         x="Result",
         nbins=20,
         color="Audit Status",
+        color_discrete_map=color_discrete_map,
         hover_data=["Store", "Entity Id", "Employee Name"],
         title=f"{country} - Performance Distribution",
         labels={"Result": "Performance Score"}
@@ -83,11 +84,12 @@ st.subheader("🏬 Store-wise Performance Bell Curves")
 for store in sorted(df['Store'].dropna().unique()):
     st.markdown(f"#### {store}")
     store_df = df[df['Store'] == store]
-    fig_store = px.histogram(color_discrete_map=color_discrete_map, 
+    fig_store = px.histogram(
         store_df,
         x="Result",
         nbins=20,
         color="Audit Status",
+        color_discrete_map=color_discrete_map,
         hover_data=["Country", "Entity Id", "Employee Name"],
         title=f"{store} - Performance Distribution",
         labels={"Result": "Performance Score"}
@@ -111,7 +113,8 @@ for status in area_pivot.columns:
         y=area_pivot[status],
         stackgroup='one',
         name=status,
-        mode='lines'
+        mode='lines',
+        line=dict(color=color_discrete_map.get(status))
     ))
 fig_area.update_layout(
     title='Cumulative Stacked Area Chart by Audit Status',
@@ -139,7 +142,8 @@ for country in sorted(df['Country'].dropna().unique()):
                 y=area_pivot_country[status],
                 stackgroup='one',
                 name=status,
-                mode='lines'
+                mode='lines',
+                line=dict(color=color_discrete_map.get(status))
             ))
         fig_country_area.update_layout(
             title=f'Cumulative Audit Status by Score Range in {country}',
@@ -167,7 +171,8 @@ for store in sorted(df['Store'].dropna().unique()):
                 y=area_pivot_store[status],
                 stackgroup='one',
                 name=status,
-                mode='lines'
+                mode='lines',
+                line=dict(color=color_discrete_map.get(status))
             ))
         fig_store_area.update_layout(
             title=f'Cumulative Audit Status by Score Range in {store}',
