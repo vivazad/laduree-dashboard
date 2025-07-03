@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from PIL import Image
 import numpy as np
+from scipy.stats import norm
 
 # ------------------ Branding Header ------------------
 col1, col2 = st.columns([1, 1])
@@ -91,22 +92,22 @@ fig_store = px.histogram(
 fig_store.update_layout(bargap=0.1)
 st.plotly_chart(fig_store)
 
-# ------------------ Probability Distribution Plot ------------------
-st.subheader("Probability Distribution of Scores")
+# ------------------ Probability Distribution Chart ------------------
+st.subheader("Probability Density of Performance Scores")
 
 mean_score = filtered_df['Result'].mean()
 std_dev = filtered_df['Result'].std()
 
-x = np.linspace(0, 100, 500)
-y = (1 / (std_dev * np.sqrt(2 * np.pi))) * np.exp(-(x - mean_score)**2 / (2 * std_dev**2))
+x = np.linspace(filtered_df['Result'].min(), filtered_df['Result'].max(), 500)
+pdf_y = norm.pdf(x, mean_score, std_dev)
 
-fig_dist = go.Figure()
-fig_dist.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Normal Distribution'))
-fig_dist.add_vline(x=mean_score, line_dash='dash', line_color='green', annotation_text='Mean', annotation_position='top left')
-fig_dist.update_layout(title='Probability Distribution of Performance Scores',
-                       xaxis_title='Performance Score',
-                       yaxis_title='Probability Density')
-st.plotly_chart(fig_dist)
+fig_pdf = go.Figure()
+fig_pdf.add_trace(go.Scatter(x=x, y=pdf_y, mode='lines', name='PDF'))
+fig_pdf.add_vline(x=mean_score, line_dash='dash', line_color='green', annotation_text='Mean', annotation_position='top left')
+fig_pdf.update_layout(title='Probability Density Function (PDF) of Performance Scores',
+                      xaxis_title='Performance Score',
+                      yaxis_title='Probability Density')
+st.plotly_chart(fig_pdf)
 
 st.markdown(f"""**Mean Score:** {mean_score:.2f}  
 **Standard Deviation:** {std_dev:.2f}""")
