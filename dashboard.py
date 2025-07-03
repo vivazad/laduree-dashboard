@@ -1,4 +1,13 @@
 
+color_discrete_map = {
+    "Below Expectation": "#FF9999",       # pastel red
+    "Needs Improvement": "#ADD8E6",       # pastel blue
+    "Meets Expectation": "#90EE90",       # pastel green
+    "Outstanding": "#77DD77"              # softer green
+}
+
+
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -26,7 +35,7 @@ df = df[
 
 # --------- Main Audit Status Interactive Chart ---------
 st.subheader("📊 Interactive Overall Bell Curve with Audit Status")
-fig_audit = px.histogram(
+fig_audit = px.histogram(color_discrete_map=color_discrete_map, 
     df,
     x="Result",
     nbins=20,
@@ -57,7 +66,7 @@ st.subheader("🌍 Country-wise Performance Bell Curves")
 for country in sorted(df['Country'].dropna().unique()):
     st.markdown(f"#### {country}")
     country_df = df[df['Country'] == country]
-    fig_country = px.histogram(
+    fig_country = px.histogram(color_discrete_map=color_discrete_map, 
         country_df,
         x="Result",
         nbins=20,
@@ -74,7 +83,7 @@ st.subheader("🏬 Store-wise Performance Bell Curves")
 for store in sorted(df['Store'].dropna().unique()):
     st.markdown(f"#### {store}")
     store_df = df[df['Store'] == store]
-    fig_store = px.histogram(
+    fig_store = px.histogram(color_discrete_map=color_discrete_map, 
         store_df,
         x="Result",
         nbins=20,
