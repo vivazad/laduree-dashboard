@@ -111,3 +111,18 @@ st.plotly_chart(fig_pdf)
 
 st.markdown(f"""**Mean Score:** {mean_score:.2f}  
 **Standard Deviation:** {std_dev:.2f}""")
+
+# ------------------ New Graph: Country vs Score by Audit Status ------------------
+st.subheader("Score Distribution by Country and Audit Status")
+fig_country_status = px.strip(
+    filtered_df,
+    x="Country",
+    y="Result",
+    color="Audit Status",
+    hover_data=["Employee Name", "Store", "Entity Id"],
+    stripmode="overlay",
+    labels={"Result": "Performance Score"},
+    title="Performance Scores by Country Grouped by Audit Status"
+)
+fig_country_status.update_layout(yaxis=dict(range=[0, 100]))
+st.plotly_chart(fig_country_status)
