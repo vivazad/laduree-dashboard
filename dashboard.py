@@ -176,3 +176,49 @@ for store in sorted(df['Store'].dropna().unique()):
         showlegend=False
     )
     st.plotly_chart(fig_store)
+
+
+
+# ------------------ Stacked Area Chart (Replaces Iceberg) ------------------
+st.subheader("🧊 Stacked Area Chart – Audit Status Distribution")
+
+# Reapply filters
+area_countries = st.multiselect("🌍 Filter by Country", options=df['Country'].unique(), default=df['Country'].unique())
+area_stores = st.multiselect("🏬 Filter by Store", options=df['Store'].unique(), default=df['Store'].unique())
+area_statuses = st.multiselect("🎯 Filter by Audit Status", options=df['Audit Status'].unique(), default=df['Audit Status'].unique())
+
+area_df = df[
+    (df['Country'].isin(area_countries)) &
+    (df['Store'].isin(area_stores)) &
+    (df['Audit Status'].isin(area_statuses))
+]
+
+# Count by status and performance bins
+area_df['Score Bin'] = pd.cut(area_df['Result'], bins=20)
+grouped = area_df.groupby(['Score Bin', 'Audit Status']).size().reset_index(name='Count')
+grouped['Score Mid'] = grouped['Score Bin'].apply(lambda x: x.mid)
+
+# Pivot to wide format for stacked area
+pivot = grouped.pivot(index='Score Mid', columns='Audit Status', values='Count').fillna(0)
+pivot = pivot[['Below Expectation', 'Needs Improvement', 'Meets Expectation', 'Outstanding']].fillna(0)
+
+fig_area = go.Figure()
+colors = ['#d62728', '#ff7f0e', '#2ca02c', '#1f77b4']
+for i, status in enumerate(pivot.columns):
+    fig_area.add_trace(go.Scatter(
+        x=pivot.index,
+        y=pivot[status],
+        stackgroup='one',
+        name=status,
+        line=dict(width=0.5),
+        mode='lines',
+        fillcolor=colors[i]
+    ))
+
+fig_area.update_layout(
+    title="Stacked Area Chart – Performance by Audit Status",
+    xaxis_title="Performance Score",
+    yaxis_title="Number of Employees",
+    legend_title="Audit Status"
+)
+st.plotly_chart(fig_area)
