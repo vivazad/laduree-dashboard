@@ -34,10 +34,21 @@ filtered_df = df[
 
 # ------------------ Audit Status Explanation ------------------
 
+
 # ------------------ New Charts ------------------
+
 st.subheader("📊 Store-wise Count by Audit Status")
+
+selected_stores_bar = st.multiselect(
+    "Select Store(s) for Audit Status Count Chart",
+    options=sorted(df['Store'].dropna().unique()),
+    default=sorted(df['Store'].dropna().unique())
+)
+
+filtered_status_df = df[df['Store'].isin(selected_stores_bar)]
+
 fig_store_audit_status = px.bar(
-    df.groupby(['Store', 'Audit Status']).size().reset_index(name='Count'),
+    filtered_status_df.groupby(['Store', 'Audit Status']).size().reset_index(name='Count'),
     x="Store",
     y="Count",
     color="Audit Status",
@@ -48,40 +59,30 @@ fig_store_audit_status = px.bar(
 fig_store_audit_status.update_layout(xaxis_tickangle=-45)
 st.plotly_chart(fig_store_audit_status)
 
-st.subheader("🏆 Top & Bottom Stores by Country")
+# ------------------ Country-specific Store Performance Chart ------------------
 
-# Calculate Top and Bottom Stores
-store_avg = df.groupby(['Country', 'Store'])['Result'].mean().reset_index()
-top_stores = store_avg.sort_values(['Country', 'Result'], ascending=[True, False]).groupby('Country').head(1)
-bottom_stores = store_avg.sort_values(['Country', 'Result'], ascending=[True, True]).groupby('Country').head(1)
+st.subheader("🏆 Store Performance by Country")
 
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("**Top Store per Country**")
-    st.dataframe(top_stores.rename(columns={'Result': 'Average Score'}).round(2))
-with col2:
-    st.markdown("**Bottom Store per Country**")
-    st.dataframe(bottom_stores.rename(columns={'Result': 'Average Score'}).round(2))
-
-st.markdown("""
-### Audit Status Legend
-- **Outstanding**: Exceptional performance (above 85%)
-- **Good**: Solid performance (70%–85%)
-- **Needs Improvement**: Below expectations (below 70%)
-""")
-
-# ------------------ Overall Bell Curve ------------------
-st.subheader("Overall Bell Curve of Performance Scores")
-fig_overall = px.histogram(
-    filtered_df,
-    x="Result",
-    nbins=20,
-    color="Audit Status",
-    hover_data=["Store", "Entity Id", "Employee Name", "Country"],
-    labels={"Result": "Performance Score"}
+selected_country_perf = st.selectbox(
+    "Select Country to View Store Performance",
+    sorted(df['Country'].dropna().unique())
 )
-fig_overall.update_layout(bargap=0.1)
-st.plotly_chart(fig_overall)
+
+country_store_avg = df[df['Country'] == selected_country_perf].groupby('Store')['Result'].mean().reset_index()
+country_store_avg = country_store_avg.sort_values(by='Result', ascending=False)
+
+fig_country_perf = px.bar(
+    country_store_avg,
+    x='Store',
+    y='Result',
+    text='Result',
+    title=f"Store Performance in {selected_country_perf} (High to Low)",
+    labels={"Result": "Average Score"}
+)
+fig_country_perf.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+fig_country_perf.update_layout(xaxis_tickangle=-45, yaxis=dict(range=[0, 100]))
+st.plotly_chart(fig_country_perf)
+
 
 # ------------------ Country Drilldown ------------------
 st.subheader("Country-wise Bell Curve and Drilldown")
