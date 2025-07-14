@@ -33,6 +33,36 @@ filtered_df = df[
 ]
 
 # ------------------ Audit Status Explanation ------------------
+
+# ------------------ New Charts ------------------
+st.subheader("📊 Store-wise Count by Audit Status")
+fig_store_audit_status = px.bar(
+    df.groupby(['Store', 'Audit Status']).size().reset_index(name='Count'),
+    x="Store",
+    y="Count",
+    color="Audit Status",
+    barmode="stack",
+    title="Store-wise Count by Audit Status",
+    labels={"Count": "Number of Employees"}
+)
+fig_store_audit_status.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig_store_audit_status)
+
+st.subheader("🏆 Top & Bottom Stores by Country")
+
+# Calculate Top and Bottom Stores
+store_avg = df.groupby(['Country', 'Store'])['Result'].mean().reset_index()
+top_stores = store_avg.sort_values(['Country', 'Result'], ascending=[True, False]).groupby('Country').head(1)
+bottom_stores = store_avg.sort_values(['Country', 'Result'], ascending=[True, True]).groupby('Country').head(1)
+
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("**Top Store per Country**")
+    st.dataframe(top_stores.rename(columns={'Result': 'Average Score'}).round(2))
+with col2:
+    st.markdown("**Bottom Store per Country**")
+    st.dataframe(bottom_stores.rename(columns={'Result': 'Average Score'}).round(2))
+
 st.markdown("""
 ### Audit Status Legend
 - **Outstanding**: Exceptional performance (above 85%)
